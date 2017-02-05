@@ -45,41 +45,37 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#include "ueye_cam/ueye_cam_nodelet.hpp"
+#ifndef UEYE_CAM_NODE_HPP_
+#define UEYE_CAM_NODE_HPP_
 
 
-//#define DEBUG_PRINTOUT_FRAME_GRAB_RATES
+#include <ueye_cam/ueye_cam_ros.hpp>
+#include <ros/ros.h>
 
 
 namespace ueye_cam {
 
 
-// Note that these default settings will be overwritten by queryCamParams() during connectCam()
-UEyeCamNodelet::UEyeCamNodelet():
-    nodelet::Nodelet(),
-    UEyeCamRos() {}
+/**
+ * ROS interface node for UEye camera API from IDS Imaging Development Systems GMBH.
+ */
+class UEyeCamNode : public UEyeCamRos {
+public:
+
+  UEyeCamNode(ros::NodeHandle& node_handle);
+
+  virtual ~UEyeCamNode();
+
+protected:
+  virtual ros::NodeHandle& getNodeHandle() const;
+  virtual ros::NodeHandle& getPrivateNodeHandle() const;
+
+private:
+	ros::NodeHandle& node_handle;
+};
 
 
-UEyeCamNodelet::~UEyeCamNodelet() {
-}
+} // namespace ueye_cam
 
 
-void UEyeCamNodelet::onInit() {
-	UEyeCamRos::init();
-}
-
-
-ros::NodeHandle& UEyeCamNodelet::getNodeHandle() const {
-	return nodelet::Nodelet::getNodeHandle();
-}
-
-
-ros::NodeHandle& UEyeCamNodelet::getPrivateNodeHandle() const {
-	return nodelet::Nodelet::getPrivateNodeHandle();
-}
-
-} //namespace ueye_cam
-
-
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(ueye_cam::UEyeCamNodelet, nodelet::Nodelet)
+#endif /* UEYE_CAM_NODE_HPP_ */

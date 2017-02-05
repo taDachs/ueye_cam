@@ -50,6 +50,7 @@ if(NOT UEYE_LIBRARY)
 endif()
 
 set(UEYECAM_NODELET_NAME ueye_cam_nodelet)
+set(UEYECAM_NODE_NAME ueye_cam_node)
 set(UEYECAM_LIB_NAME ueye_wrapper)
 
 set(UEYECAM_LIB_SOURCES
@@ -63,10 +64,22 @@ set(UEYECAM_LIB_HEADERS
 
 set(UEYECAM_NODELET_SOURCES
   src/ueye_cam_nodelet.cpp
+  src/ueye_cam_ros.cpp
 )
 
 set(UEYECAM_NODELET_HEADERS
   include/ueye_cam/ueye_cam_nodelet.hpp
+  include/ueye_cam/ueye_cam_ros.hpp
+)
+
+set(UEYECAM_NODE_SOURCES
+  src/ueye_cam_node.cpp
+  src/ueye_cam_ros.cpp
+)
+
+set(UEYECAM_NODE_HEADERS
+  include/ueye_cam/ueye_cam_node.hpp
+  include/ueye_cam/ueye_cam_ros.hpp
 )
 
 generate_dynamic_reconfigure_options(
@@ -92,6 +105,10 @@ target_link_libraries(${UEYECAM_LIB_NAME} ${catkin_LIBRARIES} ${UEYE_LIBRARY})
 add_library(${UEYECAM_NODELET_NAME} ${UEYECAM_NODELET_SOURCES} ${UEYECAM_NODELET_HEADERS})
 target_link_libraries(${UEYECAM_NODELET_NAME} ${catkin_LIBRARIES} ${UEYECAM_LIB_NAME})
 add_dependencies(${UEYECAM_NODELET_NAME} ${PROJECT_NAME}_gencfg)
+
+add_executable(${UEYECAM_NODE_NAME} ${UEYECAM_NODE_SOURCES} ${UEYECAM_NODE_HEADERS})
+target_link_libraries(${UEYECAM_NODE_NAME} ${catkin_LIBRARIES} ${UEYECAM_LIB_NAME})
+add_dependencies(${UEYECAM_NODE_NAME} ${PROJECT_NAME}_gencfg)
 
 add_executable(check_ueye_api src/check_ueye_api.cpp)
 target_link_libraries(check_ueye_api ${catkin_LIBRARIES} ${UEYECAM_LIB_NAME})

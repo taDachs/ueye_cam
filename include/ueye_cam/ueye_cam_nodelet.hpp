@@ -50,43 +50,17 @@
 
 
 #include <nodelet/nodelet.h>
-#include <dynamic_reconfigure/server.h>
-#include <image_transport/image_transport.h>
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/CameraInfo.h>
-#include <sensor_msgs/SetCameraInfo.h>
-#include <ueye_cam/UEyeCamConfig.h>
-#include <boost/thread/mutex.hpp>
-#include <ueye_cam/ueye_cam_driver.hpp>
+#include <ueye_cam/ueye_cam_ros.hpp>
 
 
 namespace ueye_cam {
 
 
-typedef dynamic_reconfigure::Server<ueye_cam::UEyeCamConfig> ReconfigureServer;
-
-
 /**
  * ROS interface nodelet for UEye camera API from IDS Imaging Development Systems GMBH.
  */
-class UEyeCamNodelet : public nodelet::Nodelet, public UEyeCamDriver {
+class UEyeCamNodelet : virtual public nodelet::Nodelet, public UEyeCamRos {
 public:
-  constexpr static unsigned int RECONFIGURE_RUNNING = 0;
-  constexpr static unsigned int RECONFIGURE_STOP = 1;
-  constexpr static unsigned int RECONFIGURE_CLOSE = 3;
-  constexpr static int DEFAULT_IMAGE_WIDTH = 640;  // NOTE: these default values do not matter, as they
-  constexpr static int DEFAULT_IMAGE_HEIGHT = 480; // are overwritten by queryCamParams() during connectCam()
-  constexpr static double DEFAULT_EXPOSURE = 33.0;
-  constexpr static double DEFAULT_FRAME_RATE = 10.0;
-  constexpr static int DEFAULT_PIXEL_CLOCK = 25;
-  constexpr static int DEFAULT_FLASH_DURATION = 1000;
-
-  const static std::string DEFAULT_FRAME_NAME;
-  const static std::string DEFAULT_CAMERA_NAME;
-  const static std::string DEFAULT_CAMERA_TOPIC;
-  const static std::string DEFAULT_TIMEOUT_TOPIC;
-  const static std::string DEFAULT_COLOR_MODE;
-
 
   UEyeCamNodelet();
 
@@ -98,116 +72,9 @@ public:
    */
   virtual void onInit();
 
-  /**
-   * Handles callbacks from dynamic_reconfigure.
-   */
-  void configCallback(ueye_cam::UEyeCamConfig& config, uint32_t level);
-
-
 protected:
-  /**
-   * Calls UEyeCamDriver::syncCamConfig(), then updates ROS camera info
-   * and ROS image settings.
-   */
-  virtual INT syncCamConfig(std::string dft_mode_str = "mono8");
-
-  /**
-   * Reads parameter values from currently selected camera.
-   */
-  INT queryCamParams();
-
-  /**
-   * Loads, validates, and updates static ROS parameters.
-   */
-  INT parseROSParams(ros::NodeHandle& local_nh);
-
-  /**
-   * Initializes the camera handle, loads UEye INI configuration, refreshes
-   * parameters from camera, loads and sets static ROS parameters, and starts
-   * the frame grabber thread.
-   */
-  virtual INT connectCam();
-
-  /**
-   * Stops the frame grabber thread, closes the camera handle,
-   * and releases all local variables.
-   */
-  virtual INT disconnectCam();
-
-  /**
-   * (ROS Service) Updates the camera's intrinsic parameters over the ROS topic,
-   * and saves the parameters to a flatfile.
-   */
-  bool setCamInfo(sensor_msgs::SetCameraInfo::Request& req,
-      sensor_msgs::SetCameraInfo::Response& rsp);
-
-  /**
-   * Loads the camera's intrinsic parameters from camIntrFilename.
-   */
-  void loadIntrinsicsFile();
-
-
-  /**
-   * Saves the camera's intrinsic parameters to camIntrFilename.
-   */
-  bool saveIntrinsicsFile();
-
-  /**
-   * Main ROS interface "spin" loop.
-   */
-  void frameGrabLoop();
-  void startFrameGrabber();
-  void stopFrameGrabber();
-
-  const static std::map<INT, std::string> ENCODING_DICTIONARY;
-  /**
-   * Transfers the current frame content into given sensor_msgs::Image,
-   * therefore writes the fields width, height, encoding, step and
-   * data of img.
-   */
-  bool fillMsgData(sensor_msgs::Image& img) const;
-
-  /**
-   * Returns image's timestamp or current wall time if driver call fails.
-   */
-  ros::Time getImageTimestamp();
-
-  /**
-   * Returns image's timestamp based on device's internal clock or current wall time if driver call fails.
-   */
-  ros::Time getImageTickTimestamp();
-
-  virtual void handleTimeout();
-
-  std::thread frame_grab_thread_;
-  bool frame_grab_alive_;
-
-  ReconfigureServer* ros_cfg_;
-  boost::recursive_mutex ros_cfg_mutex_;
-  bool cfg_sync_requested_;
-
-  image_transport::CameraPublisher ros_cam_pub_;
-  sensor_msgs::Image ros_image_;
-  sensor_msgs::CameraInfo ros_cam_info_;
-  unsigned int ros_frame_count_;
-  ros::Publisher timeout_pub_;
-  unsigned long long int timeout_count_;
-
-  ros::ServiceServer set_cam_info_srv_;
-
-  std::string frame_name_;
-  std::string cam_topic_;
-  std::string timeout_topic_;
-  std::string cam_intr_filename_;
-  std::string cam_params_filename_; // should be valid UEye INI file
-  ueye_cam::UEyeCamConfig cam_params_;
-
-  ros::Time init_ros_time_; // for processing frames
-  uint64_t init_clock_tick_;
-
-  ros::Time init_publish_time_; // for throttling frames from being published (see cfg.output_rate)
-  uint64_t prev_output_frame_idx_; // see init_publish_time_
-  boost::mutex output_rate_mutex_;
+  virtual ros::NodeHandle& getNodeHandle() const;
+  virtual ros::NodeHandle& getPrivateNodeHandle() const;
 };
 
 

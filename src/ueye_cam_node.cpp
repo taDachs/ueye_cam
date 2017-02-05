@@ -45,41 +45,43 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#include "ueye_cam/ueye_cam_nodelet.hpp"
-
-
-//#define DEBUG_PRINTOUT_FRAME_GRAB_RATES
+#include <ros/ros.h>
+#include "ueye_cam/ueye_cam_node.hpp"
 
 
 namespace ueye_cam {
 
 
-// Note that these default settings will be overwritten by queryCamParams() during connectCam()
-UEyeCamNodelet::UEyeCamNodelet():
-    nodelet::Nodelet(),
-    UEyeCamRos() {}
+UEyeCamNode::UEyeCamNode(ros::NodeHandle& node_handle):
+    UEyeCamRos(),
+    node_handle(node_handle) {}
 
 
-UEyeCamNodelet::~UEyeCamNodelet() {
+UEyeCamNode::~UEyeCamNode() {
 }
 
 
-void UEyeCamNodelet::onInit() {
-	UEyeCamRos::init();
+ros::NodeHandle& UEyeCamNode::getNodeHandle() const {
+	return node_handle;
 }
 
 
-ros::NodeHandle& UEyeCamNodelet::getNodeHandle() const {
-	return nodelet::Nodelet::getNodeHandle();
+ros::NodeHandle& UEyeCamNode::getPrivateNodeHandle() const {
+	return node_handle;
 }
 
 
-ros::NodeHandle& UEyeCamNodelet::getPrivateNodeHandle() const {
-	return nodelet::Nodelet::getPrivateNodeHandle();
+} // namespace ueye_cam
+
+
+int main(int argc, char **argv) {
+  ros::init(argc, argv, "ueye_cam");
+
+  ros::NodeHandle n;
+  
+  ueye_cam::UEyeCamNode node(n);
+
+  node.init();
+
+  ros::spin();
 }
-
-} //namespace ueye_cam
-
-
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(ueye_cam::UEyeCamNodelet, nodelet::Nodelet)
