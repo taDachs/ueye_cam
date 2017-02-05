@@ -52,9 +52,10 @@
 namespace ueye_cam {
 
 
-UEyeCamNode::UEyeCamNode(ros::NodeHandle& node_handle):
+UEyeCamNode::UEyeCamNode(ros::NodeHandle& node_handle, ros::NodeHandle& private_node_handle):
     UEyeCamRos(),
-    node_handle(node_handle) {}
+    node_handle(node_handle),
+    private_node_handle(private_node_handle) {}
 
 
 UEyeCamNode::~UEyeCamNode() {
@@ -67,7 +68,7 @@ ros::NodeHandle& UEyeCamNode::getNodeHandle() const {
 
 
 ros::NodeHandle& UEyeCamNode::getPrivateNodeHandle() const {
-	return node_handle;
+	return private_node_handle;
 }
 
 
@@ -76,10 +77,9 @@ ros::NodeHandle& UEyeCamNode::getPrivateNodeHandle() const {
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "ueye_cam");
-
-  ros::NodeHandle n;
-  
-  ueye_cam::UEyeCamNode node(n);
+  ros::NodeHandle nh;
+  ros::NodeHandle priv_nh("~");
+  ueye_cam::UEyeCamNode node(nh, priv_nh);
 
   node.init();
 

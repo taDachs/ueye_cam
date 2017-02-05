@@ -62,7 +62,7 @@ namespace ueye_cam {
 class UEyeCamNode : public UEyeCamRos {
 public:
 
-  UEyeCamNode(ros::NodeHandle& node_handle);
+  UEyeCamNode(ros::NodeHandle& node_handle, ros::NodeHandle& private_node_handle);
 
   virtual ~UEyeCamNode();
 
@@ -72,6 +72,8 @@ protected:
 
 private:
 	ros::NodeHandle& node_handle;
+	ros::NodeHandle& private_node_handle;
+       
 };
 
 
