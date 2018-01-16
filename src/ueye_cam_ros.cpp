@@ -988,7 +988,7 @@ void UEyeCamRos::frameGrabLoop() {
             if (abs((ros::Time::now() - init_ros_time_).toSec()) > abs((ros::Time::now() - (init_ros_time_-ros::Duration(3600,0))).toSec())) { init_ros_time_ -= ros::Duration(3600,0); }
           }
         }
-        img_msg_ptr->header.stamp = cam_info_msg_ptr->header.stamp = getImageTickTimestamp();
+        img_msg_ptr->header.stamp = cam_info_msg_ptr->header.stamp = ros::Time::now();//getImageTickTimestamp();
 
         // Process new frame
 #ifdef DEBUG_PRINTOUT_FRAME_GRAB_RATES
