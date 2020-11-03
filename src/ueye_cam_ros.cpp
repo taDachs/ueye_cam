@@ -84,7 +84,6 @@ UEyeCamRos::UEyeCamRos():
     timeout_topic_(DEFAULT_TIMEOUT_TOPIC),
     cam_intr_filename_(""),
     cam_params_filename_(""),
-    init_clock_tick_(0),
     init_publish_time_(0),
     prev_output_frame_idx_(0) {
   ros_image_.is_bigendian = (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__); // TODO: what about MS Windows?
@@ -1035,8 +1034,6 @@ void UEyeCamRos::frameGrabLoop() {
 
         ros_cam_pub_.publish(img_msg_ptr, cam_info_msg_ptr);
       }
-    } else {
-        init_clock_tick_ = 0;
     }
 
     if (!frame_grab_alive_ || !ros::ok()) break;
