@@ -84,7 +84,6 @@ UEyeCamRos::UEyeCamRos():
     timeout_topic_(DEFAULT_TIMEOUT_TOPIC),
     cam_intr_filename_(""),
     cam_params_filename_(""),
-    init_clock_tick_(0),
     init_publish_time_(0),
     prev_output_frame_idx_(0) {
   ros_image_.is_bigendian = (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__); // TODO: what about MS Windows?
@@ -978,17 +977,7 @@ void UEyeCamRos::frameGrabLoop() {
         sensor_msgs::ImagePtr img_msg_ptr(new sensor_msgs::Image(ros_image_));
         sensor_msgs::CameraInfoPtr cam_info_msg_ptr(new sensor_msgs::CameraInfo(ros_cam_info_));
         
-        // Initialize/compute frame timestamp based on clock tick value from camera
-        if (init_ros_time_.isZero()) {
-          if(getClockTick(&init_clock_tick_)) {
-            init_ros_time_ = getImageTimestamp();
-
-            // Deal with instability in getImageTimestamp due to daylight savings time
-            if (abs((ros::Time::now() - init_ros_time_).toSec()) > abs((ros::Time::now() - (init_ros_time_+ros::Duration(3600,0))).toSec())) { init_ros_time_ += ros::Duration(3600,0); }
-            if (abs((ros::Time::now() - init_ros_time_).toSec()) > abs((ros::Time::now() - (init_ros_time_-ros::Duration(3600,0))).toSec())) { init_ros_time_ -= ros::Duration(3600,0); }
-          }
-        }
-        img_msg_ptr->header.stamp = cam_info_msg_ptr->header.stamp = ros::Time::now();//getImageTickTimestamp();
+        img_msg_ptr->header.stamp = cam_info_msg_ptr->header.stamp = ros::Time::now();
 
         // Process new frame
 #ifdef DEBUG_PRINTOUT_FRAME_GRAB_RATES
@@ -1045,9 +1034,6 @@ void UEyeCamRos::frameGrabLoop() {
 
         ros_cam_pub_.publish(img_msg_ptr, cam_info_msg_ptr);
       }
-    } else {
-        init_ros_time_ = ros::Time(0);
-        init_clock_tick_ = 0;
     }
 
     if (!frame_grab_alive_ || !ros::ok()) break;
@@ -1175,13 +1161,6 @@ ros::Time UEyeCamRos::getImageTimestamp() {
   return ros::Time::now();
 }
 
-ros::Time UEyeCamRos::getImageTickTimestamp() {
-  uint64_t tick;
-  if(getClockTick(&tick)) {
-    return init_ros_time_ + ros::Duration(double(tick - init_clock_tick_)*1e-7);
-  }
-  return ros::Time::now();
-}
 // TODO: 0 bug where nodelet locks and requires SIGTERM when there are still subscribers (need to find where does code hang)
 
 

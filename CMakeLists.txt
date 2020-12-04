@@ -16,7 +16,7 @@ else()
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -g")
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -111,7 +111,7 @@ target_link_libraries(${UEYECAM_NODE_NAME} ${catkin_LIBRARIES} ${UEYECAM_LIB_NAM
 add_dependencies(${UEYECAM_NODE_NAME} ${PROJECT_NAME}_gencfg)
 
 add_executable(check_ueye_api src/check_ueye_api.cpp)
-target_link_libraries(check_ueye_api ${catkin_LIBRARIES} ${UEYECAM_LIB_NAME})
+target_link_libraries(check_ueye_api ${catkin_LIBRARIES})
 
 # Do not package the barebones IDS drivers, since they will mask over the official drivers (when present)
 #if(USE_UNOFFICIAL_UEYE_DRIVERS)
