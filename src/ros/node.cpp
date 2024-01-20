@@ -354,12 +354,7 @@ void Node::frameGrabLoop() {
       }
     }
 
-    // Workaround for https://github.com/ros-perception/image_common/issues/114. Reinstate the line below when fixed.
-    // currNumSubscribers = ros_cam_pub_.getNumSubscribers();
-    currNumSubscribers = std::max(
-      this->count_subscribers(ros_cam_pub_.getTopic()),
-      this->count_subscribers(ros_cam_pub_.getInfoTopic())
-    );
+    currNumSubscribers = ros_cam_pub_.getNumSubscribers();
     if (currNumSubscribers > 0 && prevNumSubscribers <= 0) {
       // Reset reference time to prevent throttling first frame
       output_rate_mutex_.lock();
